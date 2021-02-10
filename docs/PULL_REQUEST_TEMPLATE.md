@@ -8,4 +8,4 @@
 - [ ] Dokumentation ist aktualisiert (Wiki, Readme.md, Installation.md).
 - [ ] YouTrack-Ticket ist mit der Umsetzungsbeschreibung aktualisiert. 
 - [ ] YouTrack Feld «Dokumentierer» ist abgefüllt, falls die Online Help angepasst werden muss.
-- [ ] Status des YouTrack-Tickte ist auf «Behoben».
+- [ ] Status des YouTrack-Tickte ist auf «Behoben» gesetzt.
