@@ -8,4 +8,4 @@
 __Reminder__
 - [ ] Dokumentation ist aktualisiert _(Updatealeitung, Wiki, Readme.md, Installation.md)_.
 - [ ] YouTrack-Ticket ist mit der Umsetzungsbeschreibung aktualisiert. 
-- [ ] Status des YouTrack-Tickte ist auf «Behoben» gesetzt.
+- [ ] Status des YouTrack-Tickets ist auf «Behoben» gesetzt.
