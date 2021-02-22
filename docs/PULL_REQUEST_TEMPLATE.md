@@ -9,4 +9,4 @@ __Reminder__
 - [ ] Dokumentation ist aktualisiert _(Updatealeitung, Wiki, Readme.md, Installation.md)_.
 - [ ] YouTrack-Ticket ist mit der Umsetzungsbeschreibung aktualisiert. 
 - [ ] Status des YouTrack-Tickets ist auf «Behoben» gesetzt.
-- [ ] Branch in alle benötigten Release-Branches zurückführen gemäss _zu lösen in_.
+- [ ] Branch in alle benötigten Release-Branches zurückführen gemäss «zu lösen in».
