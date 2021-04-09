@@ -1,5 +1,8 @@
 {
     "name": "Release Build for .NET Core Services",
     "description": "Standardvorlage für einen .NET Core Service",
-    "iconName": "release"
+    "iconName": "release",
+    "categories": [
+        "C#"
+    ]
 }
