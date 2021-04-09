@@ -1,0 +1,86 @@
+name: .NET Core Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+        comment:
+          description: 'Bemerkung'
+          required: false
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.buildAndPush.outputs.version}}
+      artifact-name: ${{ steps.buildAndPush.outputs.artifact-name}}
+      is-pre-release: ${{ steps.buildAndPush.outputs.is-pre-release}}
+    steps:
+    - name: Check Out
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - id: buildAndPush
+      name: Build docker image and push
+      uses: CMInformatik/dotnet-build@main
+      with: 
+        app-name: "Bsp.: cmi-push-service"
+        myget-pre-auth-url: ${{secrets.MYGET_PRE_AUTH_URL}}
+        docker-password: ${{secrets.DOCKER_PASSWORD}}
+        docker-username: ${{secrets.DOCKER_USERNAME}}
+        build-configuration: release
+
+    - name: Convert markdown to PDF
+      uses: CMInformatik/markdown-to-pdf@master
+      with:
+        input_dir: doc
+        output_dir: Dokumentation
+        build_html: false
+
+    - name: Upload PDF as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Dokumentation
+        path: Dokumentation
+  
+  createRelease:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v.${{ needs.build.outputs.version }}
+        release_name: v.${{ needs.build.outputs.version }}
+        draft: false
+        prerelease: ${{ needs.build.outputs.is-pre-release }}
+
+    - name: Download artifacts
+      id: download_artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: ./
+
+    - name: Create artifacts archive
+      run: |
+        cd ${{steps.download_artifacts.outputs.download-path}}
+        mv ${{ needs.build.outputs.artifact-name }} Installationsdateien 
+        zip -r ./result.zip .
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./result.zip
+        asset_name: ${{ needs.build.outputs.artifact-name }}.zip
+        asset_content_type: application/zip
