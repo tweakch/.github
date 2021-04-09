@@ -1,0 +1,28 @@
+name: .NET Core CI Build
+
+on:
+  workflow_dispatch:
+    inputs:
+        comment:
+          description: 'Bemerkung'
+          required: false
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check Out
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Build docker image and push
+      uses: CMInformatik/dotnet-build@main
+      with: 
+        app-name: Beispiel: cmi-push-service
+        myget-pre-auth-url: ${{secrets.MYGET_PRE_AUTH_URL}}
+        docker-password: ${{secrets.DOCKER_PASSWORD}}
+        docker-username: ${{secrets.DOCKER_USERNAME}}
+        build-configuration: debug
