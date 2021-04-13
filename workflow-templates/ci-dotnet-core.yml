@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APP_NAME: APP-Name (Bsp. cmi-push-service)
     steps:
     - name: Check Out
       uses: actions/checkout@v2
@@ -21,7 +23,7 @@ jobs:
     - name: Build docker image and push
       uses: CMInformatik/dotnet-build@main
       with: 
-        app-name: Beispiel: cmi-push-service
+        app-name: ${{env.APP_NAME}}
         myget-pre-auth-url: ${{secrets.MYGET_PRE_AUTH_URL}}
         docker-password: ${{secrets.DOCKER_PASSWORD}}
         docker-username: ${{secrets.DOCKER_USERNAME}}
