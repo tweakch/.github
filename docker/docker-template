@@ -3,11 +3,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS publish
 
 ARG buildConfiguration=debug
-ENV appName=Solution-Name ohne Endung (Bsp. CMI.PushService)
+ENV appName=CMI.Webapi.Contactsync
 ENV solutionfile=$appName.sln
 
-WORKDIR /
 COPY . .
+WORKDIR /src
 
 RUN --mount=type=secret,id=nuget_config \
                                         cp /run/secrets/nuget_config ./nuget.config &&\
