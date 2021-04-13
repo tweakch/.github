@@ -1,0 +1,34 @@
+# syntax = docker/dockerfile:1.0-experimental
+# the line above allows using buildtime secrets on buildkit-enabled docker hosts.
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS publish
+
+ARG buildConfiguration=debug
+ENV appName=Solution-Name ohne Endung (Bsp. CMI.PushService)
+ENV solutionfile=$appName.sln
+
+WORKDIR /
+COPY . .
+
+RUN --mount=type=secret,id=nuget_config \
+                                        cp /run/secrets/nuget_config ./nuget.config &&\
+                                        dotnet nuget disable source "Microsoft Visual Studio Offline Packages" || true &&\
+                                        dotnet restore  "./$solutionfile" &&\
+                                        rm nuget.config
+
+RUN echo Configuration: $buildConfiguration
+RUN dotnet build "./$solutionfile" --no-restore -c $buildConfiguration
+RUN dotnet test "./$solutionfile" --no-restore -c $buildConfiguration
+RUN dotnet publish "./$solutionfile" -o /app/publish --no-restore -c $buildConfiguration
+
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS final
+ENV appName=CMI.PushService
+RUN adduser --disabled-password \
+  --home /app \
+  --gecos '' dotnetuser && chown -R dotnetuser /app
+
+USER dotnetuser
+WORKDIR /app
+EXPOSE 5000
+COPY --from=publish /app/publish .
+
+ENTRYPOINT dotnet ./${appName}.dll --urls "https://+:5001"
