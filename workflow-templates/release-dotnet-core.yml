@@ -14,6 +14,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APP_NAME: APP-Name (Bsp. cmi-push-service)
+      OCTOPUS_PACKAGE_NAME: Package-Name for Octopus (Bsp. CMI.PushService)
     outputs:
       version: ${{ steps.buildAndPush.outputs.version}}
       artifact-name: ${{ steps.buildAndPush.outputs.artifact-name}}
@@ -28,11 +31,26 @@ jobs:
       name: Build docker image and push
       uses: CMInformatik/dotnet-build@main
       with: 
-        app-name: "Bsp.: cmi-push-service"
+        app-name: ${{env.APP_NAME}}
         myget-pre-auth-url: ${{secrets.MYGET_PRE_AUTH_URL}}
         docker-password: ${{secrets.DOCKER_PASSWORD}}
         docker-username: ${{secrets.DOCKER_USERNAME}}
         build-configuration: release
+
+    - name: Install Octopus CLI
+      run: |
+        sudo apt update && sudo apt install --no-install-recommends gnupg curl ca-certificates apt-transport-https && \
+        curl -sSfL https://apt.octopus.com/public.key | sudo apt-key add - && \
+        sudo sh -c "echo deb https://apt.octopus.com/ stable main > /etc/apt/sources.list.d/octopus.com.list" && \
+        sudo apt update && sudo apt install octopuscli
+
+    - name: Create Ocotpus package
+      run: |
+        mkdir -p ./packages
+        octo pack --id="${{env.OCTOPUS_PACKAGE_NAME}}" --format="Zip" --version="${{steps.buildAndPush.outputs.version}}" --basePath="./extracted-app" --outFolder="./packages"
+
+    - name: Push to Octopus
+      run: octo push --package="./packages/${{env.OCTOPUS_PACKAGE_NAME}}.${{steps.buildAndPush.outputs.version}}.zip" --server="${{ secrets.OCTOPUS_SERVER_URL }}" --apiKey="${{ secrets.OCTOPUS_API_KEY }}"
 
     - name: Convert markdown to PDF
       uses: CMInformatik/markdown-to-pdf@master
