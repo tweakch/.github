@@ -21,7 +21,7 @@ RUN dotnet test "./$solutionfile" --no-restore -c $buildConfiguration
 RUN dotnet publish "./$solutionfile" -o /app/publish --no-restore -c $buildConfiguration
 
 FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS final
-ENV appName=CMI.PushService
+ENV appName=Solution-Name ohne Endung (Bsp. CMI.Webapi.Contactsync)
 RUN adduser --disabled-password \
   --home /app \
   --gecos '' dotnetuser && chown -R dotnetuser /app
