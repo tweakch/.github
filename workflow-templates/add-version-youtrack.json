@@ -1,0 +1,8 @@
+{
+    "name": "Gelöst in in Youtrack-Ticket nachtragen auf Release-Branches",
+    "description": "Youtrack-Tickets nachtragen",
+    "iconName": "release",
+    "categories": [
+        "C#"
+    ]
+}
