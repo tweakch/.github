@@ -77,7 +77,7 @@ jobs:
             
             var value = [];
             
-            obj.filter(elm => elm.name == "Fix versions").value.forEach(elm => value.push({"name": elm.name}));
+            obj.filter(elm => elm.name == "Fix versions")[0].value.forEach(elm => value.push({"name": elm.name}));
             value.push({"name": "${{ needs.setup.outputs.branch }}"});
 
             return {"customFields":[{"name":"Fix versions","$type":"MultiVersionIssueCustomField","value": value}]}
