@@ -6,17 +6,6 @@ on:
   push:
     branches: 
       - 'release/**'
-    inputs:
-      youtrack_field_name:
-        description: 'Field-Name, welche im Youtrack aktualisiert werden soll'
-        default: 'Fix versions'
-        required: false
-        type: string
-      youtrack_field_id:
-        description: 'Field-ID im Projekt CMI, welche im Youtrack aktualisiert werden soll'
-        default: '70-303'
-        required: false
-        type: string
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
