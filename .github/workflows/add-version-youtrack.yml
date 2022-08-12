@@ -13,6 +13,17 @@ on:
     secrets:
       YOUTRACK_AUTH_TOKEN:
         required: true
+    inputs:
+      youtrack_field_name:
+        description: 'Field-Name, welche im Youtrack aktualisiert werden soll'
+        default: 'Fix versions'
+        required: false
+        type: string
+      youtrack_field_id:
+        description: 'Field-ID im Projekt CMI, welche im Youtrack aktualisiert werden soll'
+        default: '70-303'
+        required: false
+        type: string
 
 jobs:
  setup:
@@ -50,7 +61,7 @@ jobs:
         customHeaders: '{"Authorization": "${{ env.YOUTRACK_AUTH_TOKEN }}"}'
         data: '{ "name": "${{ steps.extract_branch.outputs.branch }}", "$type": "VersionBundleElement" }'
         method: POST
-        url: "https://cmiag.myjetbrains.com/api/admin/projects/69-45/customFields/70-519/bundle/values?fields=id,name"
+        url: "https://cmiag.myjetbrains.com/api/admin/projects/69-28/customFields/${{ inputs.youtrack_field_id }}/bundle/values?fields=id,name"
           
  updater:
     needs: setup
@@ -66,7 +77,7 @@ jobs:
         with: 
           customHeaders: '{"Authorization": "${{ env.YOUTRACK_AUTH_TOKEN }}"}'
           method: GET
-          url: "https://cmiag.myjetbrains.com/youtrack/api/issues/${{ matrix.message }}/customFields/70-519?fields=value(name, $type)"
+          url: "https://cmiag.myjetbrains.com/youtrack/api/issues/${{ matrix.message }}/customFields?fields=name,value(name)"
       - name: Build Post-Data
         id: builddata
         uses: actions/github-script@v6
@@ -77,10 +88,10 @@ jobs:
             
             var value = [];
             
-            obj.value.forEach(elm => value.push({"name": elm.name}));
+            obj.filter(elm => elm.name == ${{ inputs.youtrack_field_name }})[0].value.forEach(elm => value.push({"name": elm.name}));
             value.push({"name": "${{ needs.setup.outputs.branch }}"});
 
-            return {"customFields":[{"name":"Fix versions","$type":"MultiVersionIssueCustomField","value": value}]}
+            return {"customFields":[{"name":"${{ inputs.youtrack_field_name }}","$type":"MultiVersionIssueCustomField","value": value}]}
       - name: "set fix version in youtrack"
         env:
           YOUTRACK_AUTH_TOKEN: ${{ secrets.YOUTRACK_AUTH_TOKEN }}
