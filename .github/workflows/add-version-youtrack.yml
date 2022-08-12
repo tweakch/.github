@@ -66,7 +66,7 @@ jobs:
         with: 
           customHeaders: '{"Authorization": "${{ env.YOUTRACK_AUTH_TOKEN }}"}'
           method: GET
-          url: "https://cmiag.myjetbrains.com/youtrack/api/issues/${{ matrix.message }}/customFields/70-519?fields=value(name, $type)"
+          url: "https://cmiag.myjetbrains.com/youtrack/api/issues/${{ matrix.message }}/customFields?fields=name,value(name)"
       - name: Build Post-Data
         id: builddata
         uses: actions/github-script@v6
@@ -77,7 +77,7 @@ jobs:
             
             var value = [];
             
-            obj.value.forEach(elm => value.push({"name": elm.name}));
+            obj.filter(elm => elm.name == "Fix versions").value.forEach(elm => value.push({"name": elm.name}));
             value.push({"name": "${{ needs.setup.outputs.branch }}"});
 
             return {"customFields":[{"name":"Fix versions","$type":"MultiVersionIssueCustomField","value": value}]}
