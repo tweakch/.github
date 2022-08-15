@@ -88,7 +88,7 @@ jobs:
             
             var value = [];
             
-            obj.filter(elm => elm.name == ${{ inputs.youtrack_field_name }})[0].value.forEach(elm => value.push({"name": elm.name}));
+            obj.filter(elm => elm.name == "${{ inputs.youtrack_field_name }}")[0].value.forEach(elm => value.push({"name": elm.name}));
             value.push({"name": "${{ needs.setup.outputs.branch }}"});
 
             return {"customFields":[{"name":"${{ inputs.youtrack_field_name }}","$type":"MultiVersionIssueCustomField","value": value}]}
