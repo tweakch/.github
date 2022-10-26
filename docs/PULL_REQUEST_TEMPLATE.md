@@ -10,3 +10,6 @@ __Reminder__
 - [ ] YouTrack-Ticket ist mit der Umsetzungsbeschreibung aktualisiert. 
 - [ ] Status des YouTrack-Tickets ist auf «Behoben» gesetzt.
 - [ ] Branch in alle benötigten Release-Branches zurückführen gemäss «zu lösen in».
+
+Dokumentation und Do's and Dont's
+https://cminformatik.atlassian.net/l/cp/usT6kKy5
