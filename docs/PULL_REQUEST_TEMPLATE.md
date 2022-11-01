@@ -12,4 +12,4 @@ __Reminder__
 - [ ] Branch in alle benötigten Release-Branches zurückführen gemäss «zu lösen in».
 
 __Dokumentationen__
-- [Do's and Dont](https://cminformatik.atlassian.net/l/cp/usT6kKy5)
+- [CMI-Webclients Dos and Don’ts](https://cminformatik.atlassian.net/l/cp/usT6kKy5)
