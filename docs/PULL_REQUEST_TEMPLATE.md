@@ -1,4 +1,4 @@
-### Definition of Done
+### Todo's
 
 - [ ] Alle Texte welche im UI ersichtlich sind übersetzbar.
 - [ ] Unit- / BDD-Tests sind erstellt _(Frage lautet immer: Warum braucht es keine Unit-/BDD-Tests)_.
