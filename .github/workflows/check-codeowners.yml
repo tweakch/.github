@@ -1,0 +1,35 @@
+name: PR von Codeowner reviewed
+
+on:
+  pull_request:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  codeowners:
+    if: github.event.review.state == 'approved'
+    name: Generelle Codeowners (Alle ohne Lernende und neue Mitarbeiter)
+    runs-on: ubuntu-latest
+    env:
+      codeowners: "borgiman;gregorbosshard;urva;Matthias-Hess;fdc-cmi;EliaSaSe;bschaeublin;cmiagmbu;cmiagika;HeinzBiglerCMI;DenoshanRajasingam;Luca-Guettinger;jweiss27;juergotter;andreaszingg;marco554;LukasMerz;OliverBecker92;PhilipCereto;cmimar01;SimonSchwendele;cmiagpsc"
+    steps:
+      - name: Check Codeowners
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh --version
+          hasreviewer=false
+          for reviewer in $(gh pr view $PR --json reviews -q '.reviews[] | select(.state == "APPROVED") | .author["login"]' --repo $GITHUB_REPOSITORY); do
+            echo "Checking ${reviewer}"
+            hasreviewer=true
+            [[ "$reviewer" =~ 'app/' ]] && reviewer="${reviewer:4}"
+            if [[ "${{ env.codeowners }}" =~ ${reviewer} ]]; then
+              echo "Found reviewer"
+              exit 0
+            fi
+          done
+          if $hasreviewer; then
+            echo "Review muss von einem Codeowner durchgeführt werden ${{ env.codeowners }}" 
+            exit 1
+          fi
