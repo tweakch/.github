@@ -1,35 +1,66 @@
 name: PR von Codeowner reviewed
 
 on:
-  pull_request:
   pull_request_review:
-    types: [submitted]
+    types: 
+      - submitted
+      - edited
+      - dismissed
 
 jobs:
   codeowners:
-    if: github.event.review.state == 'approved'
-    name: Generelle Codeowners (Alle ohne Lernende und neue Mitarbeiter)
+    name: Check codeowners
     runs-on: ubuntu-latest
-    env:
-      codeowners: "borgiman;gregorbosshard;urva;Matthias-Hess;fdc-cmi;EliaSaSe;bschaeublin;cmiagmbu;cmiagika;HeinzBiglerCMI;DenoshanRajasingam;Luca-Guettinger;jweiss27;juergotter;andreaszingg;marco554;LukasMerz;OliverBecker92;PhilipCereto;cmimar01;SimonSchwendele;cmiagpsc"
     steps:
-      - name: Check Codeowners
+      - name: Check codeowners approval
+        id: cocheck
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CMI_GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          gh --version
-          hasreviewer=false
-          for reviewer in $(gh pr view $PR --json reviews -q '.reviews[] | select(.state == "APPROVED") | .author["login"]' --repo $GITHUB_REPOSITORY); do
-            echo "Checking ${reviewer}"
-            hasreviewer=true
-            [[ "$reviewer" =~ 'app/' ]] && reviewer="${reviewer:4}"
-            if [[ "${{ env.codeowners }}" =~ ${reviewer} ]]; then
-              echo "Found reviewer"
-              exit 0
-            fi
+          function isApproved {
+          for reviewer in "${approver[@]}"; do
+              echo "Try approval of $reviewer"
+              [[ "$reviewer" =~ 'app/' ]] && reviewer="${reviewer:4}"
+              [[ "$2" =~ "${reviewer}" ]] && echo "Approved by: $reviewer" && return 0
           done
-          if $hasreviewer; then
-            echo "Review muss von einem Codeowner durchgeführt werden ${{ env.codeowners }}" 
-            exit 1
+              echo "* Review of \`$1\` requires one of \`$2\`" >> missingCos
+              canContinue='false'
+          }
+          
+          approver=()
+          mapfile -t approver < <(gh pr view $PR --json reviews -q '.reviews[] | select(.state == "APPROVED") | .author["login"]' --repo $GITHUB_REPOSITORY)
+          
+          [[ ${#approver[@]} > 0 ]] || ( echo "At least one approver is required" && exit 1) 
+          
+          canContinue='true'
+          isApproved "any" "${{ vars.CO_GENERAL }}"
+                    
+          echo "MISSING_COS<<EOF" >> $GITHUB_ENV
+          
+          echo "CAN_CONTINUE=$canContinue" >> "$GITHUB_OUTPUT"
+          echo "Output: ${canContinue}"
+
+          if [[ "$canContinue" == 'true' ]];then
+            echo "No futher approvals required"
+            echo "No further" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            exit 0
           fi
+
+          echo "Some files require further approvals.."
+          echo "$(cat ./missingCos)" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          exit 1
+          
+      - name: Decorate PR
+        if: ( success() || failure() ) && steps.cocheck.outputs.CAN_CONTINUE == 'false'
+        uses: thollander/actions-comment-pull-request@v2.4.2
+        with:
+          message: |
+            ${{ env.MISSING_COS }}
+          comment_tag: codeowner_checklist
+          mode: recreate
+          create_if_not_exists: true
+          GITHUB_TOKEN: ${{ secrets.CMI_GITHUBTOKEN_RW }}
